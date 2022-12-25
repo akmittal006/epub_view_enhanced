@@ -62,6 +62,7 @@ class _EpubViewState extends State<EpubView> {
   EpubCfiReader? _epubCfiReader;
   EpubChapterViewValue? _currentValue;
   final _chapterIndexes = <int>[];
+  int highlightedPara = 5;
 
   EpubController get _controller => widget.controller;
 
@@ -326,6 +327,7 @@ class _EpubViewState extends State<EpubView> {
     int chapterIndex,
     int paragraphIndex,
     ExternalLinkPressed onExternalLinkPressed,
+      int highlightPara
   ) {
     if (paragraphs.isEmpty) {
       return Container();
@@ -338,29 +340,59 @@ class _EpubViewState extends State<EpubView> {
       children: <Widget>[
         if (chapterIndex >= 0 && paragraphIndex == 0)
           builders.chapterDividerBuilder(chapters[chapterIndex]),
-        Html(
-          data: paragraphs[index].element.outerHtml,
-          onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
-          style: {
-            'html': Style(
-              padding: options.paragraphPadding as EdgeInsets?,
-            ).merge(Style.fromTextStyle(options.textStyle)),
-          },
-          customRenders: {
-            tagMatcher('img'):
+        if (index == highlightPara)
+          Container(
+            color: Colors.blue,
+            child: Html(
+              data: paragraphs[index].element.outerHtml,
+              onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
+              style: {
+                'html': Style(
+                  padding: options.paragraphPadding as EdgeInsets?,
+                ).merge(Style.fromTextStyle(options.textStyle)),
+              },
+              customRenders: {
+                tagMatcher('img'):
+                    CustomRender.widget(widget: (context, buildChildren) {
+                  final url = context.tree.element!.attributes['src']!
+                      .replaceAll('../', '');
+                  return Image(
+                    image: MemoryImage(
+                      Uint8List.fromList(
+                        document.Content!.Images![url]!.Content!,
+                      ),
+                    ),
+                  );
+                }),
+              },
+            ),
+          )
+        else
+          Container(
+            child: Html(
+              data: paragraphs[index].element.outerHtml,
+              onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
+              style: {
+                'html': Style(
+                  padding: options.paragraphPadding as EdgeInsets?,
+                ).merge(Style.fromTextStyle(options.textStyle)),
+              },
+              customRenders: {
+                tagMatcher('img'):
                 CustomRender.widget(widget: (context, buildChildren) {
-              final url = context.tree.element!.attributes['src']!
-                  .replaceAll('../', '');
-              return Image(
-                image: MemoryImage(
-                  Uint8List.fromList(
-                    document.Content!.Images![url]!.Content!,
-                  ),
-                ),
-              );
-            }),
-          },
-        ),
+                  final url = context.tree.element!.attributes['src']!
+                      .replaceAll('../', '');
+                  return Image(
+                    image: MemoryImage(
+                      Uint8List.fromList(
+                        document.Content!.Images![url]!.Content!,
+                      ),
+                    ),
+                  );
+                }),
+              },
+            ),
+          )
       ],
     );
   }
@@ -383,6 +415,7 @@ class _EpubViewState extends State<EpubView> {
           _getChapterIndexBy(positionIndex: index),
           _getParagraphIndexBy(positionIndex: index),
           _onLinkPressed,
+          highlightedPara
         );
       },
     );
@@ -438,5 +471,11 @@ class _EpubViewState extends State<EpubView> {
       _buildLoaded,
       _loadingError,
     );
+  }
+
+  void highlightPara(int para) {
+    setState(() {
+      highlightedPara = para;
+    });
   }
 }

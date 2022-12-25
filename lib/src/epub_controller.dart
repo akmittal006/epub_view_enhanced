@@ -56,6 +56,17 @@ class EpubController {
     );
   }
 
+  List<String> getParagraphs() {
+    if (_epubViewState != null) {
+      return _epubViewState!._paragraphs.map((e) => e.element.text).toList();
+    }
+    return [];
+  }
+
+  void highlightPara(int index) {
+    _epubViewState?.highlightPara(index);
+  }
+
   String? generateEpubCfi() => _epubViewState?._epubCfiReader?.generateCfi(
         book: _document,
         chapter: _epubViewState?._currentValue?.chapter,
