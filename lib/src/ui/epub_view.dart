@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:epub_view_enhanced/src/custom_stack.dart';
 import 'package:epub_view_enhanced/src/data/epub_cfi_reader.dart';
 import 'package:epub_view_enhanced/src/data/epub_parser.dart';
 import 'package:epub_view_enhanced/src/data/models/chapter.dart';

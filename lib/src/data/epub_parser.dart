@@ -1,19 +1,33 @@
 import 'package:epub_view_enhanced/src/data/epub_cfi_reader.dart';
 import 'package:html/dom.dart' as dom;
 
+import '../custom_stack.dart';
 import 'models/paragraph.dart';
 
 export 'package:epubx/epubx.dart' hide Image;
 
-List<EpubChapter> parseChapters(EpubBook epubBook) =>
-    epubBook.Chapters!.fold<List<EpubChapter>>(
-      [],
-      (acc, next) {
-        acc.add(next);
-        next.SubChapters!.forEach(acc.add);
-        return acc;
-      },
-    );
+List<EpubChapter> parseChapters(EpubBook epubBook) {
+  CustomStack<EpubChapter> dfsStack = CustomStack();
+  EpubChapter current;
+  return epubBook.Chapters!.fold<List<EpubChapter>>(
+    [],
+    (acc, next) {
+      // acc.add(next);
+      dfsStack.push(next);
+      while(dfsStack.isNotEmpty) {
+        current = dfsStack.pop();
+        acc.add(current);
+        // current.Anchor ??= "NULL";
+        // print("ANCHOR : " + current.Anchor!);
+
+        if (current.SubChapters != null && current.SubChapters!.isNotEmpty) {
+          current.SubChapters!.reversed.forEach((element) { dfsStack.push(element);});
+        }
+      }
+      return acc;
+    },
+  );
+}
 
 List<dom.Element> convertDocumentToElements(dom.Document document) =>
     document.getElementsByTagName('body').first.children;
@@ -38,31 +52,34 @@ ParseParagraphsResult parseParagraphs(
 ) {
   String? filename = '';
   final List<int> chapterIndexes = [];
+  List<dom.Element> prevElmList = [];
   final paragraphs = chapters.fold<List<Paragraph>>(
     [],
     (acc, next) {
       List<dom.Element> elmList = [];
       if (filename != next.ContentFileName) {
+
         filename = next.ContentFileName;
         final document = EpubCfiReader().chapterDocument(next);
         if (document != null) {
           final result = convertDocumentToElements(document);
           elmList = _removeAllDiv(result);
         }
+        prevElmList = elmList;
       }
 
       if (next.Anchor == null) {
         // last element from document index as chapter index
         chapterIndexes.add(acc.length);
-        acc.addAll(elmList
-            .map((element) => Paragraph(element, chapterIndexes.length - 1)));
+        acc.addAll(elmList.map((element) => Paragraph(element, chapterIndexes.length - 1)));
         return acc;
       } else {
-        final index = elmList.indexWhere(
+        final index = prevElmList.indexWhere(
           (elm) => elm.outerHtml.contains(
-            'id="${next.Anchor}"',
+            "${next.Anchor}",
           ),
         );
+
         if (index == -1) {
           chapterIndexes.add(acc.length);
           acc.addAll(elmList
@@ -70,7 +87,7 @@ ParseParagraphsResult parseParagraphs(
           return acc;
         }
 
-        chapterIndexes.add(index);
+        chapterIndexes.add(chapterIndexes.last + index);
         acc.addAll(elmList
             .map((element) => Paragraph(element, chapterIndexes.length - 1)));
         return acc;

@@ -88,17 +88,28 @@ class EpubController {
     }
 
     int index = -1;
+    EpubChapter current;
+    CustomStack<EpubChapter> dfsStack = CustomStack();
 
     return _cacheTableOfContents =
         _document!.Chapters!.fold<List<EpubViewChapter>>(
       [],
       (acc, next) {
-        index += 1;
-        acc.add(EpubViewChapter(next.Title, _getChapterStartIndex(index)));
-        for (final subChapter in next.SubChapters!) {
+        dfsStack.push(next);
+
+        while (dfsStack.isNotEmpty) {
           index += 1;
+          current = dfsStack.pop();
           acc.add(EpubViewSubChapter(
-              subChapter.Title, _getChapterStartIndex(index)));
+              current.Title, _getChapterStartIndex(index)));
+
+          if (current.SubChapters != null && current.SubChapters!.isNotEmpty) {
+            List<EpubChapter> subchaps = [];
+            for (final subChap in current.SubChapters!) {
+              subchaps.add(subChap);
+            }
+            subchaps.reversed.toList().forEach((element) {dfsStack.push(element);});
+          }
         }
         return acc;
       },

@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Fixed TOC bugs
+
 ## 1.3.0
 
 * Updated EpubView to accept onTapDown and onLongPress functions as arguments
