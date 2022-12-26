@@ -64,13 +64,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.17.2"
-  epubx:
+  epub_parser:
     dependency: "direct main"
     description:
-      name: epubx
+      name: epub_parser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   equatable:
     dependency: "direct main"
     description:

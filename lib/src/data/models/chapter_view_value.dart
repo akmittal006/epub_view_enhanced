@@ -1,7 +1,7 @@
 import 'package:epub_view_enhanced/src/data/epub_parser.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-export 'package:epubx/epubx.dart' hide Image;
+export 'package:epub_parser/epub_parser.dart' hide Image;
 
 class EpubChapterViewValue {
   const EpubChapterViewValue({

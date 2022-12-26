@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-export 'package:epubx/epubx.dart' hide Image;
+export 'package:epub_parser/epub_parser.dart';
 
 part '../epub_controller.dart';
 part '../helpers/epub_view_builders.dart';
@@ -95,21 +95,24 @@ class _EpubViewState extends State<EpubView> {
     });
   }
 
-  @override
-  void dispose() {
-    _itemPositionListener!.itemPositions.removeListener(_changeListener);
-    _controller._detach();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _itemPositionListener!.itemPositions.removeListener(_changeListener);
+  //   _controller._detach();
+  //   super.dispose();
+  // }
 
   Future<bool> _init() async {
     if (_controller.isBookLoaded.value) {
       return true;
     }
     _chapters = parseChapters(_controller._document!);
+    print("ERROROROR ::: 4");
     final parseParagraphsResult =
         parseParagraphs(_chapters, _controller._document!.Content);
+    print("ERROROROR ::: 5");
     _paragraphs = parseParagraphsResult.flatParagraphs;
+    print("ERROROROR ::: 6");
     _chapterIndexes.addAll(parseParagraphsResult.chapterIndexes);
 
     _epubCfiReader = EpubCfiReader.parser(
@@ -117,7 +120,9 @@ class _EpubViewState extends State<EpubView> {
       chapters: _chapters,
       paragraphs: _paragraphs,
     );
+    print("ERROROROR ::: 7");
     _itemPositionListener!.itemPositions.addListener(_changeListener);
+    print("ERROROROR ::: 8");
     _controller.isBookLoaded.value = true;
 
     return true;

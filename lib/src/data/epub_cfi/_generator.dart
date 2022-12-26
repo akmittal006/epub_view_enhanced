@@ -1,4 +1,4 @@
-import 'package:epubx/epubx.dart';
+import 'package:epub_parser/epub_parser.dart';
 import 'package:html/dom.dart';
 
 class EpubCfiGenerator {

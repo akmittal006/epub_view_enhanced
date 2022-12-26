@@ -34,13 +34,17 @@ class EpubController {
     Duration duration = const Duration(milliseconds: 250),
     double alignment = 0,
     Curve curve = Curves.linear,
-  }) =>
+  }) {
+    if (_epubViewState!._itemScrollController!.isAttached) {
       _epubViewState?._itemScrollController?.scrollTo(
         index: index,
         duration: duration,
         alignment: alignment,
         curve: curve,
       );
+    }
+  }
+
 
   void gotoEpubCfi(
     String epubCfi, {
@@ -133,10 +137,14 @@ class EpubController {
     try {
       loadingState.value = EpubViewLoadingState.loading;
       _document = await document;
+      print("ERROROROR ::: 1");
       await _epubViewState!._init();
+      print("ERROROROR ::: 2");
       tableOfContentsListenable.value = tableOfContents();
+      print("ERROROROR ::: 3" );
       loadingState.value = EpubViewLoadingState.success;
     } catch (error) {
+      print("ERROROROR ::: " + error.toString());
       _epubViewState!._loadingError = error is Exception
           ? error
           : Exception('An unexpected error occurred');

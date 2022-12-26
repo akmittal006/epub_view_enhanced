@@ -5,7 +5,7 @@ import 'epub_cfi/epub_cfi.dart';
 import 'epub_parser.dart';
 import 'models/paragraph.dart';
 
-export 'package:epubx/epubx.dart' hide Image;
+export 'package:epub_parser/epub_parser.dart' hide Image;
 
 class EpubCfiReader {
   EpubCfiReader()

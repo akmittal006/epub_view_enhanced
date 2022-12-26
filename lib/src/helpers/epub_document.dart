@@ -1,7 +1,7 @@
 // ignore: unnecessary_import
 import 'dart:typed_data';
 
-import 'package:epubx/epubx.dart';
+import 'package:epub_parser/epub_parser.dart';
 import 'package:flutter/services.dart';
 import 'package:universal_file/universal_file.dart';
 
