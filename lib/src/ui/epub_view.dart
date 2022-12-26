@@ -28,6 +28,8 @@ class EpubView extends StatefulWidget {
     this.onChapterChanged,
     this.onDocumentLoaded,
     this.onDocumentError,
+    this.onTapDown,
+    this.onLongPress,
     this.builders = const EpubViewBuilders<DefaultBuilderOptions>(
       options: DefaultBuilderOptions(),
     ),
@@ -39,6 +41,8 @@ class EpubView extends StatefulWidget {
   final ExternalLinkPressed? onExternalLinkPressed;
   final bool shrinkWrap;
   final void Function(EpubChapterViewValue? value)? onChapterChanged;
+  final void Function(TapDownDetails details)? onTapDown;
+  final void Function(BuildContext context, int index)? onLongPress;
 
   /// Called when a document is loaded
   final void Function(EpubBook document)? onDocumentLoaded;
@@ -327,7 +331,9 @@ class _EpubViewState extends State<EpubView> {
     int chapterIndex,
     int paragraphIndex,
     ExternalLinkPressed onExternalLinkPressed,
-      int highlightPara
+    int highlightPara,
+    void Function(TapDownDetails details)? onTapDown,
+    void Function(BuildContext context, int index)? onLongPress,
   ) {
     if (paragraphs.isEmpty) {
       return Container();
@@ -336,64 +342,72 @@ class _EpubViewState extends State<EpubView> {
     final defaultBuilder = builders as EpubViewBuilders<DefaultBuilderOptions>;
     final options = defaultBuilder.options;
 
-    return Column(
-      children: <Widget>[
-        if (chapterIndex >= 0 && paragraphIndex == 0)
-          builders.chapterDividerBuilder(chapters[chapterIndex]),
-        if (index == highlightPara)
-          Container(
-            color: Colors.blue,
-            child: Html(
-              data: paragraphs[index].element.outerHtml,
-              onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
-              style: {
-                'html': Style(
-                  padding: options.paragraphPadding as EdgeInsets?,
-                ).merge(Style.fromTextStyle(options.textStyle)),
-              },
-              customRenders: {
-                tagMatcher('img'):
-                    CustomRender.widget(widget: (context, buildChildren) {
-                  final url = context.tree.element!.attributes['src']!
-                      .replaceAll('../', '');
-                  return Image(
-                    image: MemoryImage(
-                      Uint8List.fromList(
-                        document.Content!.Images![url]!.Content!,
+    return GestureDetector(
+      onTapDown: onTapDown,
+      onLongPress: () {
+        if (onLongPress != null) {
+          onLongPress(context,index);
+        }
+      },
+      child: Column(
+        children: <Widget>[
+          if (chapterIndex >= 0 && paragraphIndex == 0)
+            builders.chapterDividerBuilder(chapters[chapterIndex]),
+          if (index == highlightPara)
+            Container(
+              color: Colors.blue,
+              child: Html(
+                data: paragraphs[index].element.outerHtml,
+                onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
+                style: {
+                  'html': Style(
+                    padding: options.paragraphPadding as EdgeInsets?,
+                  ).merge(Style.fromTextStyle(options.textStyle)),
+                },
+                customRenders: {
+                  tagMatcher('img'):
+                      CustomRender.widget(widget: (context, buildChildren) {
+                    final url = context.tree.element!.attributes['src']!
+                        .replaceAll('../', '');
+                    return Image(
+                      image: MemoryImage(
+                        Uint8List.fromList(
+                          document.Content!.Images![url]!.Content!,
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              },
-            ),
-          )
-        else
-          Container(
-            child: Html(
-              data: paragraphs[index].element.outerHtml,
-              onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
-              style: {
-                'html': Style(
-                  padding: options.paragraphPadding as EdgeInsets?,
-                ).merge(Style.fromTextStyle(options.textStyle)),
-              },
-              customRenders: {
-                tagMatcher('img'):
-                CustomRender.widget(widget: (context, buildChildren) {
-                  final url = context.tree.element!.attributes['src']!
-                      .replaceAll('../', '');
-                  return Image(
-                    image: MemoryImage(
-                      Uint8List.fromList(
-                        document.Content!.Images![url]!.Content!,
+                    );
+                  }),
+                },
+              ),
+            )
+          else
+            Container(
+              child: Html(
+                data: paragraphs[index].element.outerHtml,
+                onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
+                style: {
+                  'html': Style(
+                    padding: options.paragraphPadding as EdgeInsets?,
+                  ).merge(Style.fromTextStyle(options.textStyle)),
+                },
+                customRenders: {
+                  tagMatcher('img'):
+                  CustomRender.widget(widget: (context, buildChildren) {
+                    final url = context.tree.element!.attributes['src']!
+                        .replaceAll('../', '');
+                    return Image(
+                      image: MemoryImage(
+                        Uint8List.fromList(
+                          document.Content!.Images![url]!.Content!,
+                        ),
                       ),
-                    ),
-                  );
-                }),
-              },
-            ),
-          )
-      ],
+                    );
+                  }),
+                },
+              ),
+            )
+        ],
+      ),
     );
   }
 
@@ -415,7 +429,9 @@ class _EpubViewState extends State<EpubView> {
           _getChapterIndexBy(positionIndex: index),
           _getParagraphIndexBy(positionIndex: index),
           _onLinkPressed,
-          highlightedPara
+          highlightedPara,
+          widget.onTapDown,
+          widget.onLongPress
         );
       },
     );

@@ -27,7 +27,9 @@ typedef ChaptersBuilder = Widget Function(
   int chapterIndex,
   int paragraphIndex,
   ExternalLinkPressed onExternalLinkPressed,
-  int highlightedPara
+  int highlightedPara,
+  void Function(TapDownDetails details)? onTapDown,
+  void Function(BuildContext context, int index)? onLongPress,
 );
 
 typedef ChapterDividerBuilder = Widget Function(EpubChapter value);
