@@ -62,7 +62,7 @@ class _EpubViewState extends State<EpubView> {
   EpubCfiReader? _epubCfiReader;
   EpubChapterViewValue? _currentValue;
   final _chapterIndexes = <int>[];
-  int highlightedPara = 5;
+  int highlightedPara = -1;
 
   EpubController get _controller => widget.controller;
 

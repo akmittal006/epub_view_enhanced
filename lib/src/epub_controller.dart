@@ -56,11 +56,11 @@ class EpubController {
     );
   }
 
-  List<String> getParagraphs() {
+  ParseParagraphsResult getParagraphs() {
     if (_epubViewState != null) {
-      return _epubViewState!._paragraphs.map((e) => e.element.text).toList();
+      return ParseParagraphsResult(_epubViewState!._paragraphs, _epubViewState!._chapterIndexes);
     }
-    return [];
+    return ParseParagraphsResult([], []);
   }
 
   void highlightPara(int index) {
