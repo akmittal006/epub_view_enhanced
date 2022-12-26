@@ -51,7 +51,6 @@ ParseParagraphsResult parseParagraphs(
   List<EpubChapter> chapters,
   EpubContent? content,
 ) {
-  print("LENGTH " + chapters.length.toString());
   String? filename = '';
   final List<int> chapterIndexes = [];
   List<dom.Element> prevElmList = [];
@@ -60,7 +59,6 @@ ParseParagraphsResult parseParagraphs(
     (acc, next) {
       List<dom.Element> elmList = [];
       if (filename != next.ContentFileName) {
-        print("ERROROROR FFF::: 1");
         filename = next.ContentFileName;
         final document = EpubCfiReader().chapterDocument(next);
         if (document != null) {
@@ -71,43 +69,35 @@ ParseParagraphsResult parseParagraphs(
       }
 
       if (next.Anchor == null) {
-        print("ERROROROR FFF::: 1");
         // last element from document index as chapter index
         chapterIndexes.add(acc.length);
         acc.addAll(elmList.map((element) => Paragraph(element, chapterIndexes.length - 1)));
         return acc;
       } else {
-        print("ERROROROR FFF::: 2");
         final index = prevElmList.indexWhere(
           (elm) => elm.outerHtml.contains(
             "${next.Anchor}",
           ),
         );
-        print("ERROROROR FFF::: 3");
 
         if (index == -1) {
-          print("ERROROROR FFF::: 4");
           chapterIndexes.add(acc.length);
           acc.addAll(elmList
               .map((element) => Paragraph(element, chapterIndexes.length - 1)));
           return acc;
         }
-        print("ERROROROR FFF::: 5");
         if (chapterIndexes.isEmpty) {
           chapterIndexes.add(index);
         } else {
           chapterIndexes.add(chapterIndexes.last + index);
         }
 
-        print("ERROROROR FFF::: 6");
         acc.addAll(elmList
             .map((element) => Paragraph(element, chapterIndexes.length - 1)));
-        print("ERROROROR FFF::: 7");
         return acc;
       }
     },
   );
-  print("ERROROROR FFF::: 8");
   return ParseParagraphsResult(paragraphs, chapterIndexes);
 }
 

@@ -137,14 +137,10 @@ class EpubController {
     try {
       loadingState.value = EpubViewLoadingState.loading;
       _document = await document;
-      print("ERROROROR ::: 1");
       await _epubViewState!._init();
-      print("ERROROROR ::: 2");
       tableOfContentsListenable.value = tableOfContents();
-      print("ERROROROR ::: 3" );
       loadingState.value = EpubViewLoadingState.success;
     } catch (error) {
-      print("ERROROROR ::: " + error.toString());
       _epubViewState!._loadingError = error is Exception
           ? error
           : Exception('An unexpected error occurred');

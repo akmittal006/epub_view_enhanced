@@ -1,3 +1,8 @@
+## 1.5.0
+
+* Changed epubx dependency to epub_parser
+* Fixed Misc bugs
+
 ## 1.4.0
 
 * Fixed TOC bugs

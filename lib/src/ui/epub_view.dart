@@ -107,12 +107,9 @@ class _EpubViewState extends State<EpubView> {
       return true;
     }
     _chapters = parseChapters(_controller._document!);
-    print("ERROROROR ::: 4");
     final parseParagraphsResult =
         parseParagraphs(_chapters, _controller._document!.Content);
-    print("ERROROROR ::: 5");
     _paragraphs = parseParagraphsResult.flatParagraphs;
-    print("ERROROROR ::: 6");
     _chapterIndexes.addAll(parseParagraphsResult.chapterIndexes);
 
     _epubCfiReader = EpubCfiReader.parser(
@@ -120,9 +117,7 @@ class _EpubViewState extends State<EpubView> {
       chapters: _chapters,
       paragraphs: _paragraphs,
     );
-    print("ERROROROR ::: 7");
     _itemPositionListener!.itemPositions.addListener(_changeListener);
-    print("ERROROROR ::: 8");
     _controller.isBookLoaded.value = true;
 
     return true;
