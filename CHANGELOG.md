@@ -1,3 +1,8 @@
+## 1.6.0
+* Added onItemTapped option to table of contents widget
+* Changed flutter_html version to 2.2.1
+* Fix : Loaded epub image widgets into memory
+
 ## 1.5.0
 
 * Changed epubx dependency to epub_parser

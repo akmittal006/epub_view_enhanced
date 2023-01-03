@@ -1,4 +1,5 @@
 import 'package:epub_view_enhanced/src/data/epub_cfi_reader.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:html/dom.dart' as dom;
 
 import '../../epub_view_enhanced.dart';
@@ -37,7 +38,7 @@ List<dom.Element> _removeAllDiv(List<dom.Element> elements) {
   final List<dom.Element> result = [];
 
   for (final node in elements) {
-    if (node.localName == 'div' && node.children.length > 1) {
+    if ((node.localName == 'div' || node.localName == 'section') && node.children.isNotEmpty) {
       result.addAll(_removeAllDiv(node.children));
     } else {
       result.add(node);

@@ -8,11 +8,13 @@ class EpubViewTableOfContents extends StatelessWidget {
     this.padding,
     this.itemBuilder,
     this.loader,
+    this.onItemTapped,
     Key? key,
   }) : super(key: key);
 
   final EdgeInsetsGeometry? padding;
   final EpubController controller;
+  final Function? onItemTapped;
 
   final Widget Function(
     BuildContext context,
@@ -37,8 +39,10 @@ class EpubViewTableOfContents extends StatelessWidget {
                   itemBuilder?.call(context, index, data[index], data.length) ??
                   ListTile(
                     title: Text(data[index].title!.trim()),
-                    onTap: () =>
-                        controller.scrollTo(index: data[index].startIndex),
+                    onTap: () {
+                      controller.scrollTo(index: data[index].startIndex);
+                      if (onItemTapped != null) onItemTapped!();
+                    },
                   ),
               itemCount: data.length,
             );

@@ -11,6 +11,7 @@ import 'package:epub_view_enhanced/src/data/models/paragraph.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 export 'package:epub_parser/epub_parser.dart';
 
@@ -102,6 +103,8 @@ class _EpubViewState extends State<EpubView> {
   //   super.dispose();
   // }
 
+  static Map<String, Widget?> imageMap = {};
+
   Future<bool> _init() async {
     if (_controller.isBookLoaded.value) {
       return true;
@@ -120,6 +123,18 @@ class _EpubViewState extends State<EpubView> {
     _itemPositionListener!.itemPositions.addListener(_changeListener);
     _controller.isBookLoaded.value = true;
 
+
+    //Render images
+    _controller._document?.Content?.Images?.forEach((key, value) {
+      imageMap[key] = FadeInImage(
+        fadeInDuration: const Duration(milliseconds: 250),
+        fadeOutDuration: const Duration(milliseconds: 250),
+        placeholder: MemoryImage(kTransparentImage),
+        image: MemoryImage(Uint8List.fromList(value.Content!)),
+      );
+      // value.
+    });
+
     return true;
   }
 
@@ -128,6 +143,7 @@ class _EpubViewState extends State<EpubView> {
         _itemPositionListener!.itemPositions.value.isEmpty) {
       return;
     }
+
     final position = _itemPositionListener!.itemPositions.value.first;
     final chapterIndex = _getChapterIndexBy(
       positionIndex: position.index,
@@ -322,7 +338,7 @@ class _EpubViewState extends State<EpubView> {
         ),
       );
 
-  static Widget _chapterBuilder(
+   static Widget _chapterBuilder(
     BuildContext context,
     EpubViewBuilders builders,
     EpubBook document,
@@ -354,57 +370,27 @@ class _EpubViewState extends State<EpubView> {
         children: <Widget>[
           if (chapterIndex >= 0 && paragraphIndex == 0)
             builders.chapterDividerBuilder(chapters[chapterIndex]),
-          if (index == highlightPara)
-            Container(
-              color: Colors.blue,
-              child: Html(
-                data: paragraphs[index].element.outerHtml,
-                onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
-                style: {
-                  'html': Style(
-                    padding: options.paragraphPadding as EdgeInsets?,
-                  ).merge(Style.fromTextStyle(options.textStyle)),
-                },
-                customRenders: {
-                  tagMatcher('img'):
-                      CustomRender.widget(widget: (context, buildChildren) {
-                    final url = context.tree.element!.attributes['src']!
-                        .replaceAll('../', '');
-                    return Image(
-                      image: MemoryImage(
-                        Uint8List.fromList(
-                          document.Content!.Images![url]!.Content!,
-                        ),
-                      ),
-                    );
-                  }),
-                },
-              ),
-            )
-          else
-            Container(
-              child: Html(
-                data: paragraphs[index].element.outerHtml,
-                onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
-                style: {
-                  'html': Style(
-                    padding: options.paragraphPadding as EdgeInsets?,
-                  ).merge(Style.fromTextStyle(options.textStyle)),
-                },
-                customRenders: {
-                  tagMatcher('img'):
-                  CustomRender.widget(widget: (context, buildChildren) {
-                    final url = context.tree.element!.attributes['src']!
-                        .replaceAll('../', '');
-                    return Image(
-                      image: MemoryImage(
-                        Uint8List.fromList(
-                          document.Content!.Images![url]!.Content!,
-                        ),
-                      ),
-                    );
-                  }),
-                },
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: Container(
+                key: ValueKey<String>(index.toString() + (index == highlightPara).toString()),
+                color: index == highlightPara ? Colors.blue: Colors.transparent,
+                child: Html(
+                  data: paragraphs[index].element.outerHtml,
+                  onLinkTap: (href, _, __, ___) => onExternalLinkPressed(href!),
+                  style: {
+                    'html': Style(
+                      padding: options.paragraphPadding as EdgeInsets?,
+                    ).merge(Style.fromTextStyle(options.textStyle)),
+                  },
+                  customRender: {
+                    'img': (context, buildChildren) {
+                      final url = context.tree.element!.attributes['src']!
+                          .replaceAll('../', '');
+                      return imageMap[url]!;
+                    },
+                  },
+                ),
               ),
             )
         ],
